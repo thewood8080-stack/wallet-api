@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ארנק הטבות Pro</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --accent-purple: #a78bfa;
+            --accent-blue: #60a5fa;
+        }
+
+        * { font-family: 'Heebo', sans-serif; }
+        
+        body { 
+            background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), 
+                        url('https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?q=80&w=2000') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .navbar-custom { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); padding: 1rem 2rem; position: sticky; top: 0; z-index: 1000; }
+        .glass-panel { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 25px; padding: 1.5rem; transition: 0.4s; }
+        
+        .stat-card { text-align: center; padding: 1.2rem; border-radius: 20px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.04); }
+        .stat-number { font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #fff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .benefit-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 24px; padding: 1.5rem; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: cardIn 0.6s ease-out forwards; opacity: 0; height: 100%; }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .benefit-card:hover { transform: translateY(-10px); border-color: var(--accent-purple); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .benefit-amount { font-size: 2.2rem; font-weight: 900; background: linear-gradient(90deg, #fff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .ai-box { background: linear-gradient(135deg, rgba(167, 139, 250, 0.15), rgba(96, 165, 250, 0.15)); border: 1px solid var(--accent-purple); border-radius: 20px; padding: 1.5rem; margin-top: 2rem; }
+        .camera-btn-circle { width: 55px; height: 55px; background: var(--accent-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; margin: 0 auto; box-shadow: 0 8px 15px rgba(167, 139, 250, 0.3); }
+        .camera-btn-circle:hover { transform: scale(1.1) rotate(5deg); }
+
+        .form-control-custom { background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: 14px; color: #fff; padding: 0.75rem 1rem; width: 100%; }
+        .form-control-custom:focus { background: rgba(255,255,255,0.12); border-color: var(--accent-purple); color: #fff; box-shadow: none; outline: none; }
+        .btn-action { background: linear-gradient(135deg, #a78bfa, #8b5cf6); border: none; border-radius: 14px; padding: 0.8rem; font-weight: 700; color: #fff; transition: 0.3s; cursor: pointer; }
+        
+        .section { display: none; } .section.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .custom-tabs { background: var(--glass); border-radius: 50px; padding: 6px; display: inline-flex; border: 1px solid var(--glass-border); margin-bottom: 2rem; }
+        .custom-tab { padding: 8px 25px; border-radius: 50px; border: none; background: transparent; color: #fff; font-weight: 600; transition: 0.3s; }
+        .custom-tab.active { background: var(--accent-purple); box-shadow: 0 4px 15px rgba(167, 139, 250, 0.4); }
+
+        .switch-link { color: var(--accent-purple); cursor: pointer; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar-custom d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-2">
+        <div class="bg-primary rounded-3 p-2 d-flex"><i class="bi bi-wallet2 text-white fs-5"></i></div>
+        <span class="fs-4 fw-black">ארנק הטבות</span>
+    </div>
+    <div id="authButtons" class="d-flex gap-2">
+        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="showSection('loginSection')">התחברות</button>
+        <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="showSection('registerSection')">הרשמה</button>
+    </div>
+    <div id="userMenu" class="d-none gap-2">
+        <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="logout()">התנתקות</button>
+    </div>
+</nav>
+
+<div class="container py-5">
+    <div id="alertBox"></div>
+
+    <!-- מסך התחברות -->
+    <div id="loginSection" class="section active">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-5">
+                <div class="glass-panel text-center">
+                    <h3 class="fw-bold mb-4">כניסה למערכת</h3>
+                    <input type="email" id="loginEmail" class="form-control-custom mb-3" placeholder="אימייל">
+                    <input type="password" id="loginPassword" class="form-control-custom mb-4" placeholder="סיסמה">
+                    <button class="btn-action w-100 mb-3" onclick="login()">התחברות</button>
+                    <p class="small text-white-50">אין לך חשבון? <span class="switch-link" onclick="showSection('registerSection')">הירשם כאן</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- מסך הרשמה -->
+    <div id="registerSection" class="section">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-5">
+                <div class="glass-panel text-center">
+                    <h3 class="fw-bold mb-4">הרשמה למערכת</h3>
+                    <input type="text" id="registerName" class="form-control-custom mb-3" placeholder="שם מלא">
+                    <input type="email" id="registerEmail" class="form-control-custom mb-3" placeholder="אימייל">
+                    <input type="password" id="registerPassword" class="form-control-custom mb-4" placeholder="סיסמה">
+                    <button class="btn-action w-100 mb-3" onclick="register()">הרשמה</button>
+                    <p class="small text-white-50">יש לך חשבון? <span class="switch-link" onclick="showSection('loginSection')">התחבר כאן</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- דשבורד -->
+    <div id="dashboardSection" class="section">
+        <div class="row g-3 mb-5">
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-number" id="statCredits">0</div><div class="small text-white-50">זיכויים</div></div></div>
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-number text-success" id="statSum">₪0</div><div class="small text-white-50">שווי כולל</div></div></div>
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-number" id="statCoupons">0</div><div class="small text-white-50">קופונים</div></div></div>
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-number text-info" id="statAvg">0%</div><div class="small text-white-50">חיסכון</div></div></div>
+        </div>
+
+        <div class="text-center">
+            <div class="custom-tabs">
+                <button class="custom-tab active" id="tab-credits" onclick="switchTab('credits')">זיכויים</button>
+                <button class="custom-tab" id="tab-coupons" onclick="switchTab('coupons')">קופונים</button>
+            </div>
+        </div>
+
+        <div class="glass-panel mb-5 shadow-lg">
+            <div class="row g-3 align-items-end text-center text-md-start">
+                <div class="col-md-3"><label class="small text-white-50">שם החנות</label><input type="text" id="storeName" class="form-control-custom" placeholder="זארה, פוקס וכו'"></div>
+                <div class="col-md-2"><label class="small text-white-50">סכום/הנחה</label><input type="number" id="amount" class="form-control-custom" placeholder="₪"></div>
+                <div class="col-md-3"><label class="small text-white-50">תאריך תפוגה</label><input type="date" id="expiry" class="form-control-custom"></div>
+                <div class="col-md-2">
+                    <div class="camera-btn-circle" onclick="openCamera()"><i class="bi bi-camera-fill text-white fs-4"></i></div>
+                    <small class="d-block mt-1 text-white-50">צלם פתק</small>
+                </div>
+                <div class="col-md-2"><button class="btn-action w-100 h-100" onclick="addItem()">שמור</button></div>
+            </div>
+        </div>
+
+        <div class="row g-4" id="itemsContainer"></div>
+
+        <div class="ai-box">
+            <div class="d-flex align-items-center mb-3">
+                <div class="bg-white rounded-circle p-2 me-3"><i class="bi bi-robot text-primary"></i></div>
+                <h6 class="mb-0 fw-bold">העוזר החכם (Gemini AI)</h6>
+            </div>
+            <div id="aiResponse" class="p-3 bg-dark bg-opacity-25 rounded-4 mb-3 border border-secondary border-opacity-25">
+                שאל אותי משהו, כמו: "איזה זיכוי פג הכי מוקדם?"
+            </div>
+            <div class="input-group">
+                <input type="text" id="aiQuery" class="form-control-custom flex-grow-1" placeholder="הקלד שאלה ל-AI...">
+                <button class="btn btn-primary px-4 rounded-start-0" onclick="askAI()">שאל</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- מודל מצלמה -->
+<div class="modal fade" id="camModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-0 rounded-5 overflow-hidden">
+            <div class="modal-body text-center p-4">
+                <video id="video" width="100%" autoplay class="rounded-4 mb-3"></video>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary flex-fill rounded-pill" onclick="takePhoto()">צלם</button>
+                    <button class="btn btn-outline-light rounded-pill" data-bs-dismiss="modal">ביטול</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const API = window.location.origin || '';
+    let token = '';
+    let currentTab = 'credits';
+
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function escapeHtml(str) {
+        if (str == null) return '';
+        const div = document.createElement('div');
+        div.textContent = String(str);
+        return div.innerHTML;
+    }
+
+    function handleAuthError(res) {
+        if (res.status === 401) {
+            token = '';
+            document.getElementById('authButtons').classList.remove('d-none');
+            document.getElementById('userMenu').classList.add('d-none');
+            showSection('loginSection');
+            return true;
+        }
+        return false;
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('tab-credits').classList.toggle('active', tab === 'credits');
+        document.getElementById('tab-coupons').classList.toggle('active', tab === 'coupons');
+        loadData();
+    }
+
+    async function register() {
+        try {
+            const name = document.getElementById('registerName').value?.trim() || '';
+            const email = document.getElementById('registerEmail').value?.trim() || '';
+            const password = document.getElementById('registerPassword').value || '';
+            if (!name || name.length < 2) {
+                alert('נא להזין שם תקין');
+                return;
+            }
+            if (!email) {
+                alert('נא להזין אימייל');
+                return;
+            }
+            if (!password || password.length < 6) {
+                alert('הסיסמה חייבת להכיל לפחות 6 תווים');
+                return;
+            }
+            const res = await fetch(`${API}/user/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+                alert('נרשמת בהצלחה! אנא התחבר');
+                showSection('loginSection');
+            } else {
+                alert('שגיאה: ' + (data.msg || 'הרשמה נכשלה'));
+            }
+        } catch (e) {
+            alert('שגיאת רשת');
+        }
+    }
+
+    async function login() {
+        try {
+            const email = document.getElementById('loginEmail').value?.trim() || '';
+            const password = document.getElementById('loginPassword').value || '';
+            if (!email || !password) {
+                alert('נא למלא אימייל וסיסמה');
+                return;
+            }
+            const res = await fetch(`${API}/user/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+                token = data.token;
+                document.getElementById('authButtons').classList.add('d-none');
+                document.getElementById('userMenu').classList.remove('d-none');
+                showSection('dashboardSection');
+                loadData();
+            } else {
+                alert('שגיאה בכניסה: ' + (data.msg || 'התחברות נכשלה'));
+            }
+        } catch (e) {
+            alert('שגיאת רשת');
+        }
+    }
+
+    function logout() {
+        token = '';
+        location.reload();
+    }
+
+    function openCamera() {
+        new bootstrap.Modal(document.getElementById('camModal')).show();
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(s => { document.getElementById('video').srcObject = s; })
+            .catch(() => alert('לא ניתן לגשת למצלמה'));
+    }
+
+    async function takePhoto() {
+        try {
+            const video = document.getElementById('video');
+            if (!video?.videoWidth) {
+                alert('המצלמה לא מוכנה');
+                return;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const base64 = canvas.toDataURL('image/jpeg').split(',')[1];
+            video.srcObject?.getTracks?.().forEach(t => t.stop());
+            bootstrap.Modal.getInstance(document.getElementById('camModal'))?.hide();
+            const res = await fetch(`${API}/ai/analyze`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ imageBase64: base64 })
+            });
+            if (handleAuthError(res)) return;
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+                if (data.storeName) document.getElementById('storeName').value = data.storeName;
+                if (data.amount != null) document.getElementById('amount').value = data.amount;
+                if (data.expiryDate) document.getElementById('expiry').value = data.expiryDate;
+            } else {
+                alert(data.msg || 'ניתוח התמונה נכשל');
+            }
+        } catch (e) {
+            alert('שגיאה בניתוח התמונה');
+        }
+    }
+
+    async function addItem() {
+        try {
+            const name = document.getElementById('storeName').value?.trim() || '';
+            const amt = document.getElementById('amount').value;
+            const exp = document.getElementById('expiry').value || null;
+            if (!name) {
+                alert('נא להזין שם חנות או תיאור');
+                return;
+            }
+            const path = currentTab === 'credits' ? 'credit' : 'coupon';
+            const body = currentTab === 'credits' ?
+                { storeName: name, amount: Number(amt) || 0, expiryDate: exp || undefined } :
+                { description: name, discount: amt || '', source: 'כללי', expiryDate: exp || undefined };
+            if (currentTab === 'credits' && (body.amount < 0 || isNaN(body.amount))) {
+                alert('נא להזין סכום תקין');
+                return;
+            }
+            const res = await fetch(`${API}/${path}/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(body)
+            });
+            if (handleAuthError(res)) return;
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+                document.getElementById('storeName').value = '';
+                document.getElementById('amount').value = '';
+                document.getElementById('expiry').value = '';
+                loadData();
+            } else {
+                alert(data.msg || 'שמירה נכשלה');
+            }
+        } catch (e) {
+            alert('שגיאת רשת');
+        }
+    }
+
+    async function loadData() {
+        if (!token) return;
+        try {
+            const path = currentTab === 'credits' ? 'credit' : 'coupon';
+            const res = await fetch(`${API}/${path}/`, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (handleAuthError(res)) return;
+            let items = [];
+            try {
+                items = await res.json();
+            } catch {}
+            if (!Array.isArray(items)) items = [];
+            if (currentTab === 'credits') {
+                document.getElementById('statCredits').innerText = items.length;
+                document.getElementById('statSum').innerText = '₪' + items.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+            } else {
+                document.getElementById('statCoupons').innerText = items.length;
+            }
+            const container = document.getElementById('itemsContainer');
+            const label = currentTab === 'credits' ? 'זיכוי חנות' : 'קופון';
+            const icon = currentTab === 'credits' ? 'shop' : 'ticket';
+            container.innerHTML = items.map((item, i) => {
+                const title = escapeHtml(item.storeName || item.description || '');
+                const amountStr = currentTab === 'credits' ? '₪' + (item.amount ?? '') : (item.discount ?? '') + '%';
+                const dateStr = item.expiryDate ? new Date(item.expiryDate).toLocaleDateString('he-IL') : 'ללא תאריך';
+                const safeId = String(item._id || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                return `<div class="col-md-4">
+                <div class="benefit-card" style="animation-delay: ${i * 0.1}s">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge rounded-pill bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 px-3 py-2">${label}</span>
+                        <i class="bi bi-${icon} fs-4 opacity-50"></i>
+                    </div>
+                    <div class="fw-bold fs-5 mb-1">${title}</div>
+                    <div class="benefit-amount mb-2">${escapeHtml(amountStr)}</div>
+                    <div class="small text-white-50 mb-4"><i class="bi bi-calendar3 me-1"></i> תוקף: ${escapeHtml(dateStr)}</div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-light flex-fill rounded-pill py-2 border-opacity-25" data-id="${safeId}" onclick="deleteItem(this.dataset.id)">מחיקה</button>
+                    </div>
+                </div>
+            </div>`;
+            }).join('');
+        } catch (e) {
+            document.getElementById('itemsContainer').innerHTML = '';
+        }
+    }
+
+    async function deleteItem(id) {
+        try {
+            const path = currentTab === 'credits' ? 'credit' : 'coupon';
+            const res = await fetch(`${API}/${path}/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+            if (handleAuthError(res)) return;
+            if (res.ok) loadData();
+        } catch (e) {}
+    }
+
+    async function askAI() {
+        const q = document.getElementById('aiQuery').value?.trim() || '';
+        const el = document.getElementById('aiResponse');
+        if (!q) {
+            el.textContent = 'נא להזין שאלה';
+            return;
+        }
+        el.textContent = 'מעבד נתונים...';
+        try {
+            const res = await fetch(`${API}/ai/ask`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ question: q })
+            });
+            if (handleAuthError(res)) {
+                el.textContent = 'שאל אותי משהו, כמו: "איזה זיכוי פג הכי מוקדם?"';
+                return;
+            }
+            const data = await res.json().catch(() => ({}));
+            el.textContent = res.ok ? (data.answer || 'לא התקבלה תשובה') : (data.msg || 'שגיאה');
+        } catch (e) {
+            el.textContent = 'שגיאת רשת';
+        }
+    }
+</script>
+</body>
+</html>
