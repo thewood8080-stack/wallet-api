@@ -3,162 +3,108 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Wallet Pro | ניהול זיכויים חכם</title>
-
+    <title>Wallet Pro | ניהול זיכויים</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&family=Heebo:wght@900&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-dark: #050811;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --accent: #6366f1;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-        }
-
+        :root { --bg: #050811; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
         body {
-            background-color: var(--bg-dark);
-            background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%);
-            color: #f8fafc;
+            background: linear-gradient(rgba(5, 8, 17, 0.85), rgba(5, 8, 17, 0.85)),
+                        url('https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?q=80&w=2000') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
             font-family: 'Assistant', sans-serif;
             min-height: 100vh;
         }
-
-        /* כרטיס קטגוריה */
-        .category-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .category-card:hover {
-            background: rgba(255,255,255,0.07);
-            transform: translateY(-5px);
-        }
-
-        /* רשימת חנויות בתוך קטגוריה */
-        .store-row {
-            background: rgba(255,255,255,0.02);
-            border-radius: 15px;
-            padding: 1rem;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-
-        .store-row:hover {
-            border-color: var(--accent);
-        }
-
-        /* התראת תוקף */
-        .expiry-alert {
-            font-size: 0.8rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-        .urgent { background: var(--danger); color: white; }
-        .soon { background: var(--warning); color: black; }
-
-        .benefit-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 25px;
-            padding: 1.2rem;
-            border: 1px solid var(--glass-border);
-        }
-
-        .receipt-thumb {
-            width: 100%; height: 120px; object-fit: cover; border-radius: 15px; cursor: pointer;
-        }
-
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .form-control-custom { background: rgba(255,255,255,0.08); border: 1px solid var(--border); border-radius: 12px; color: #fff; padding: 10px; }
+        .form-control-custom::placeholder { color: rgba(255,255,255,0.4); }
+        .category-card { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem; cursor: pointer; transition: 0.3s; }
+        .category-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.1); }
+        .section { display: none; } .section.active { display: block; }
+        .expiry-alert { font-size: 0.8rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+        .urgent { background: #ef4444; color: white; }
+        .soon { background: #f59e0b; color: #000; }
     </style>
 </head>
 <body>
 
-<nav class="navbar shadow-sm p-3 mb-4" style="background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--glass-border);">
-    <div class="container d-flex justify-content-between align-items-center">
-        <span class="fs-3 fw-800 tracking-tighter">WALLET<span class="text-primary">PRO</span></span>
-        <button id="logoutBtn" class="btn btn-sm btn-outline-danger rounded-pill d-none" onclick="logout()">התנתק</button>
+<nav class="p-3 border-bottom border-secondary mb-4">
+    <div class="container d-flex justify-content-between">
+        <span class="fs-3 fw-bold">WALLET<span class="text-primary">PRO</span></span>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm d-none" onclick="logout()">התנתק</button>
     </div>
 </nav>
 
 <div class="container">
-    
-    <div id="loginSection" class="section active">
-        <div class="row justify-content-center mt-5">
-            <div class="col-md-4 card bg-transparent border-0">
-                <div class="p-4 rounded-5" style="background: var(--glass); border: 1px solid var(--glass-border);">
-                    <h2 class="text-center mb-4">כניסה</h2>
-                    <input type="email" id="loginEmail" class="form-control bg-dark text-white border-secondary mb-3" placeholder="אימייל">
-                    <input type="password" id="loginPassword" class="form-control bg-dark text-white border-secondary mb-4" placeholder="סיסמה">
-                    <button class="btn btn-primary w-100 py-2 rounded-pill fw-bold" onclick="login()">התחבר</button>
-                </div>
-            </div>
+    <div id="loginSection" class="section active text-center">
+        <div class="p-5 rounded-5 d-inline-block" style="background: var(--glass); min-width: 320px;">
+            <h2 class="mb-4">כניסה למערכת</h2>
+            <input type="email" id="loginEmail" class="form-control-custom w-100 mb-3" placeholder="אימייל">
+            <input type="password" id="loginPassword" class="form-control-custom w-100 mb-4" placeholder="סיסמה">
+            <button class="btn btn-primary w-100" onclick="login()">התחבר</button>
         </div>
     </div>
 
     <div id="dashboardSection" class="section">
-        
-        <div class="p-4 rounded-5 mb-5" style="background: linear-gradient(135deg, rgba(99,102,241,0.1), transparent); border: 1px solid var(--glass-border);">
-            <div class="row g-3">
-                <div class="col-md-3"><input type="text" id="storeName" class="form-control bg-dark text-white border-0 shadow-sm" placeholder="שם חנות"></div>
+        <div class="mb-3">
+            <h4 class="fw-bold mb-1">הוספת זיכוי חדש</h4>
+            <p class="text-white-50 small mb-0">מלא את הפרטים ולחץ "שמור זיכוי" כדי להוסיף זיכוי לרשימה</p>
+        </div>
+        <div class="p-4 rounded-4 mb-5" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border);">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="small text-white mb-1">שם החנות</label>
+                    <input type="text" id="storeName" class="form-control-custom w-100" placeholder="למשל: זארה, פוקס...">
+                </div>
                 <div class="col-md-2">
-                    <select id="category" class="form-select bg-dark text-white border-0 shadow-sm">
-                        <option value="אופנה">ביגוד ואופנה</option>
-                        <option value="מזון">מזון ומסעדות</option>
+                    <label class="small text-white mb-1">קטגוריה</label>
+                    <select id="category" class="form-control-custom w-100">
+                        <option value="" disabled selected>בחירת קטגוריה...</option>
+                        <option value="ביגוד">ביגוד ואופנה</option>
+                        <option value="אוכל">אוכל ומסעדות</option>
                         <option value="פארם">פארם וטיפוח</option>
                         <option value="חשמל">חשמל ואלקטרוניקה</option>
                         <option value="אחר">אחר</option>
                     </select>
                 </div>
-                <div class="col-md-2"><input type="number" id="amount" class="form-control bg-dark text-white border-0 shadow-sm" placeholder="סכום"></div>
-                <div class="col-md-2"><input type="date" id="expiry" class="form-control bg-dark text-white border-0 shadow-sm"></div>
-                <div class="col-md-1 text-center"><button class="btn btn-light rounded-circle" onclick="openCamera()"><i class="bi bi-camera"></i></button></div>
-                <div class="col-md-2"><button class="btn btn-primary w-100 rounded-pill" onclick="addItem()">שמור</button></div>
+                <div class="col-md-2">
+                    <label class="small text-white mb-1">סכום (₪)</label>
+                    <input type="number" id="amount" class="form-control-custom w-100" placeholder="0">
+                </div>
+                <div class="col-md-2">
+                    <label class="small text-white mb-1">תאריך תפוגה</label>
+                    <input type="date" id="expiry" class="form-control-custom w-100">
+                </div>
+                <div class="col-md-1 text-center">
+                    <label class="small text-white mb-1 d-block">תמונה</label>
+                    <button class="btn btn-light rounded-circle p-2" onclick="openCamera()" title="צלם קבלה"><i class="bi bi-camera"></i></button>
+                    <div id="camStatus" class="small text-success d-none mt-1">צולם!</div>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100 py-2" onclick="addItem()">שמור זיכוי</button>
+                </div>
             </div>
         </div>
-
         <h3 class="mb-4 fw-bold">הקטגוריות שלך</h3>
-        <div id="categoriesGrid" class="row g-4">
-            </div>
+        <div id="categoriesGrid" class="row g-4"></div>
     </div>
 
     <div id="storeViewSection" class="section">
-        <button class="btn btn-link text-white p-0 mb-4" onclick="showSection('dashboardSection')"><i class="bi bi-arrow-right me-2"></i>חזור לקטגוריות</button>
-        <h2 id="currentCategoryTitle" class="fw-800 mb-4"></h2>
+        <button class="btn btn-link text-white mb-3" onclick="showSection('dashboardSection')">← חזור לקטגוריות</button>
+        <h2 id="currentCategoryTitle" class="mb-4 text-primary"></h2>
         <div id="storesList"></div>
     </div>
 
     <div id="creditsViewSection" class="section">
-        <button class="btn btn-link text-white p-0 mb-4" id="backToStoresBtn"><i class="bi bi-arrow-right me-2"></i>חזור לחנויות</button>
-        <h2 id="currentStoreTitle" class="fw-800 mb-4 text-primary"></h2>
+        <button class="btn btn-link text-white mb-3" id="backToStoresBtn">← חזור לחנויות</button>
+        <h2 id="currentStoreTitle" class="mb-4"></h2>
         <div id="creditsGrid" class="row g-4"></div>
     </div>
 </div>
 
-<div class="modal fade" id="imgModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content bg-dark border-0 rounded-5"><div class="modal-body p-0 text-center"><img id="fullImg" src="" class="img-fluid rounded-5"></div></div>
-    </div>
-</div>
-
-<div class="modal fade" id="camModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-dark border-0 rounded-5 p-4 text-center">
-            <video id="video" width="100%" autoplay class="rounded-4 mb-3"></video>
-            <button class="btn btn-primary rounded-pill w-100" onclick="takePhoto()">צלם</button>
-        </div>
-    </div>
-</div>
+<div class="modal fade" id="camModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content bg-dark p-4"><video id="video" width="100%" autoplay class="rounded-3 mb-3"></video><button class="btn btn-primary w-100" onclick="takePhoto()">צלם</button></div></div></div>
+<div class="modal fade" id="imgModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content bg-transparent text-center"><img id="fullImg" src="" class="img-fluid rounded-4 shadow-lg"><button class="btn btn-light mt-3" data-bs-dismiss="modal">סגור</button></div></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -178,46 +124,35 @@
         loadData();
     }
 
-    // --- לוגיקת נתונים ---
     async function loadData() {
-        const res = await fetch(`${API}/credit/`, { headers: { 'Authorization': `Bearer ${token}` } });
-        const items = await res.json();
-        // סינון: רק זיכויים שלא מומשו
-        allItems = items.filter(i => !i.isUsed);
-        renderCategories();
+        try {
+            const res = await fetch(`${API}/credit/`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            allItems = data.filter(i => !i.isUsed);
+            renderCategories();
+        } catch (e) { console.error("טעינה נכשלה", e); }
     }
 
     function renderCategories() {
         const categories = [...new Set(allItems.map(i => i.category || 'אחר'))];
         const grid = document.getElementById('categoriesGrid');
         grid.innerHTML = categories.map(cat => {
-            const count = allItems.filter(i => i.category === cat).length;
-            const sum = allItems.filter(i => i.category === cat).reduce((a, b) => a + Number(b.amount), 0);
-            return `
-                <div class="col-md-3">
-                    <div class="category-card" onclick="openCategory('${cat}')">
-                        <div class="text-primary fs-4 mb-2"><i class="bi bi-tag-fill"></i></div>
-                        <h4 class="fw-bold mb-1">${cat}</h4>
-                        <div class="text-white-50">${count} זיכויים | ₪${sum}</div>
-                    </div>
-                </div>`;
+            const items = allItems.filter(i => i.category === cat);
+            const sum = items.reduce((a, b) => a + Number(b.amount), 0);
+            return `<div class="col-md-4"><div class="category-card" onclick="openCategory('${cat}')"><h4 class="fw-bold">${cat}</h4><div class="text-white-50">${items.length} זיכויים | ₪${sum}</div></div></div>`;
         }).join('');
     }
 
     function openCategory(cat) {
         const catItems = allItems.filter(i => i.category === cat);
         const stores = [...new Set(catItems.map(i => i.storeName))];
-        
         document.getElementById('currentCategoryTitle').innerText = cat;
         const list = document.getElementById('storesList');
         list.innerHTML = stores.map(store => {
             const storeItems = catItems.filter(i => i.storeName === store);
             const sum = storeItems.reduce((a, b) => a + Number(b.amount), 0);
-            return `
-                <div class="store-row d-flex justify-content-between align-items-center" onclick="openStore('${store}', '${cat}')">
-                    <div><span class="fs-5 fw-bold">${store}</span></div>
-                    <div class="text-white-50">${storeItems.length} זיכויים | <span class="text-success fw-bold">₪${sum}</span></div>
-                </div>`;
+            return `<div class="p-3 mb-2 rounded-3 border border-secondary" style="cursor:pointer" onclick="openStore('${store}', '${cat}')">
+                <span class="fs-5 fw-bold">${store}</span> - ${storeItems.length} זיכויים (₪${sum})</div>`;
         }).join('');
         showSection('storeViewSection');
     }
@@ -226,108 +161,63 @@
         const storeItems = allItems.filter(i => i.storeName === store && i.category === cat);
         document.getElementById('currentStoreTitle').innerText = store;
         document.getElementById('backToStoresBtn').onclick = () => openCategory(cat);
-        
         const grid = document.getElementById('creditsGrid');
         grid.innerHTML = storeItems.map(item => {
-            const expiryStatus = getExpiryStatus(item.expiryDate);
-            return `
-                <div class="col-md-4">
-                    <div class="benefit-card">
-                        ${expiryStatus}
-                        ${item.image ? `<img src="${item.image}" class="receipt-thumb mb-3" onclick="openFullImage('${item.image}')">` : ''}
-                        <div class="fs-2 fw-800 mb-0">₪${item.amount}</div>
-                        <div class="text-white-50 small mb-3">תוקף: ${item.expiryDate ? new Date(item.expiryDate).toLocaleDateString('he-IL') : 'ללא'}</div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-success flex-fill rounded-pill" onclick="useItem('${item._id}')">מימשתי</button>
-                            <button class="btn btn-sm btn-outline-danger flex-fill rounded-pill" onclick="deleteItem('${item._id}')">מחק</button>
-                        </div>
-                    </div>
-                </div>`;
+            const diff = item.expiryDate ? Math.ceil((new Date(item.expiryDate) - new Date()) / (86400000)) : null;
+            let alert = '';
+            if(diff !== null) {
+                if(diff < 0) alert = '<div class="expiry-alert urgent">פג תוקף!</div>';
+                else if(diff <= 7) alert = `<div class="expiry-alert soon">פוקע בעוד ${diff} ימים</div>`;
+            }
+            return `<div class="col-md-4"><div class="p-4 rounded-4" style="background:rgba(255,255,255,0.05); border:1px solid var(--border)">
+                ${alert}
+                ${item.image ? `<img src="${item.image}" class="w-100 rounded-3 mb-3" style="height:120px; object-fit:cover; cursor:pointer" onclick="openFullImage('${item.image}')">` : ''}
+                <div class="fs-2 fw-bold">₪${item.amount}</div>
+                <div class="text-white-50 small mb-3">תוקף: ${item.expiryDate ? new Date(item.expiryDate).toLocaleDateString('he-IL') : 'ללא'}</div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success btn-sm w-100" onclick="useItem('${item._id}')">מימוש</button>
+                    <button class="btn btn-outline-danger btn-sm w-100" onclick="deleteItem('${item._id}')">מחק</button>
+                </div>
+            </div></div>`;
         }).join('');
         showSection('creditsViewSection');
     }
 
-    function getExpiryStatus(date) {
-        if(!date) return '';
-        const now = new Date();
-        const exp = new Date(date);
-        const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
-        
-        if (diffDays < 0) return '<div class="expiry-alert urgent mb-2">פג תוקף!</div>';
-        if (diffDays <= 7) return `<div class="expiry-alert soon mb-2">פוקע בעוד ${diffDays} ימים!</div>`;
-        return '';
-    }
-
-    // --- פעולות API ---
     async function addItem() {
+        const name = document.getElementById('storeName').value;
+        const cat = document.getElementById('category').value;
+        const amt = document.getElementById('amount').value;
+        if(!name || !cat || !amt) return alert("אנא מלא שם, קטגוריה וסכום");
+
         const formData = new FormData();
-        formData.append('storeName', document.getElementById('storeName').value);
-        formData.append('category', document.getElementById('category').value);
-        formData.append('amount', document.getElementById('amount').value);
+        formData.append('storeName', name);
+        formData.append('category', cat);
+        formData.append('amount', amt);
         formData.append('expiryDate', document.getElementById('expiry').value);
         if(capturedImageBlob) formData.append('image', capturedImageBlob, 'receipt.jpg');
 
-        await fetch(`${API}/credit/`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: formData
-        });
-        location.reload();
+        try {
+            const res = await fetch(`${API}/credit/`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+            if(res.ok) { alert("נשמר!"); location.reload(); }
+            else { alert("שגיאה בשמירה. וודא שהשרת ב-Render מעודכן."); }
+        } catch (e) { alert("שגיאת רשת"); }
     }
 
-    async function useItem(id) {
-        if(confirm('לסמן כמימוש ולהסיר מהרשימה?')) {
-            await fetch(`${API}/credit/${id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
-            loadData();
-            showSection('dashboardSection');
-        }
+    async function useItem(id) { if(confirm("לממש ולהסיר?")) { await fetch(`${API}/credit/${id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); loadData(); showSection('dashboardSection'); } }
+    async function deleteItem(id) { if(confirm("למחוק?")) { await fetch(`${API}/credit/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); loadData(); showSection('dashboardSection'); } }
+    
+    function openCamera() { new bootstrap.Modal(document.getElementById('camModal')).show(); navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(s => document.getElementById('video').srcObject = s); }
+    function takePhoto() { 
+        const v = document.getElementById('video'); const c = document.createElement('canvas');
+        c.width = v.videoWidth; c.height = v.videoHeight; c.getContext('2d').drawImage(v, 0, 0);
+        c.toBlob(b => { capturedImageBlob = b; document.getElementById('camStatus').classList.remove('d-none'); bootstrap.Modal.getInstance(document.getElementById('camModal')).hide(); v.srcObject.getTracks().forEach(t => t.stop()); }, 'image/jpeg');
     }
-
-    async function deleteItem(id) {
-        if(confirm('למחוק לצמיתות?')) {
-            await fetch(`${API}/credit/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-            loadData();
-            showSection('dashboardSection');
-        }
+    function openFullImage(s) { document.getElementById('fullImg').src = s; new bootstrap.Modal(document.getElementById('imgModal')).show(); }
+    async function login() { 
+        const email = document.getElementById('loginEmail').value; const pass = document.getElementById('loginPassword').value;
+        const res = await fetch(`${API}/user/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: pass }) });
+        const data = await res.json(); if(res.ok) { localStorage.setItem('token', data.token); location.reload(); } else alert("שגיאה");
     }
-
-    // --- מצלמה וניווט ---
-    function openCamera() {
-        new bootstrap.Modal(document.getElementById('camModal')).show();
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-            .then(stream => document.getElementById('video').srcObject = stream);
-    }
-
-    function takePhoto() {
-        const v = document.getElementById('video');
-        const canvas = document.createElement('canvas');
-        canvas.width = v.videoWidth; canvas.height = v.videoHeight;
-        canvas.getContext('2d').drawImage(v, 0, 0);
-        canvas.toBlob(blob => {
-            capturedImageBlob = blob;
-            bootstrap.Modal.getInstance(document.getElementById('camModal')).hide();
-            if(v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
-            alert('התמונה נקלטה!');
-        }, 'image/jpeg');
-    }
-
-    function openFullImage(src) {
-        document.getElementById('fullImg').src = src;
-        new bootstrap.Modal(document.getElementById('imgModal')).show();
-    }
-
-    async function login() {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        const res = await fetch(`${API}/user/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if(res.ok) { localStorage.setItem('token', data.token); location.reload(); }
-    }
-
     function logout() { localStorage.clear(); location.reload(); }
 </script>
 </body>
