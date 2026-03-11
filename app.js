@@ -36,13 +36,9 @@ app.use(express.static('./api/v1/views/wallet'));
 // ייבוא וחיבור נתיבים (Routes)
 const userRouter = require('./api/v1/routes/user');
 const creditRouter = require('./api/v1/routes/credit');
-const couponRouter = require('./api/v1/routes/coupon');
-const aiRouter = require('./api/v1/routes/ai');
 
-app.use('/ai', aiRouter);
 app.use('/user', userRouter);
 app.use('/credit', creditRouter);
-app.use('/coupon', couponRouter);
 
 // חיבור למסד נתונים MongoDB
 const mongoConstr = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_SERVER}/${process.env.MONGO_DB}?appName=Cluster0`;
