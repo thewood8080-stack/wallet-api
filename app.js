@@ -12,16 +12,18 @@ const app = express();
 
 // הגדרת Rate Limiting: הגבלת בקשות
 // מגביל כל משתמש ל-100 בקשות בכל 15 דקות
+//limiter: מגן על כל השרת מעומס
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 15 * 60 * 1000,//החישוב הוא כמו שרואים = 15 דקות 
+  max: 100,// הגבלה על כמות המשתמשים 
   message: { msg: 'Too many requests' }
 });
 
-// מגביל נתיבי אימות ל-10 ניסיונות בלבד בכל 15 דקות
+// מגביל נתיבי אימות ל-5 ניסיונות בלבד בכל 15 דקות
+//authLimiter: מגן על התחברות מניסיונות פריצה
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
+  windowMs: 15 * 60 * 1000,//כנ"ל
+  max: 5,//כמות ניסיונות למשתמש 
   message: { msg: 'Too many attempts' }
 });
 
