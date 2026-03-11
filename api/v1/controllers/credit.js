@@ -1,10 +1,11 @@
-// controllers/credit.js - לוגיקת זיכויים
+// controllers/credit.js: לוגיקת זיכויים
 // מכיל את הפונקציות לניהול זיכויי חנות: הוספה, שליפה, מימוש ומחיקה
 
 const Credit = require('../models/credit');
 const mongoose = require('mongoose');
+const { uploadToCloudinary } = require('../middlewares/upload');
 
-// addCredit - הוספת זיכוי חדש
+// addCredit: הוספת זיכוי חדש
 const addCredit = async (req, res) => {
   try {
     // קבלת הנתונים מגוף הבקשה
@@ -16,7 +17,7 @@ const addCredit = async (req, res) => {
     // המרת הסכום למספר
     const numAmount = Number(amount);
 
-    // בדיקת תאריך תפוגה - אם נשלח ולא תקין, מאפסים אותו
+    // בדיקת תאריך תפוגה, אם נשלח ולא תקין מאפסים אותו
     let validDate = expiryDate ? new Date(expiryDate) : null;
     if (validDate && isNaN(validDate.getTime())) validDate = null;
 
@@ -28,12 +29,19 @@ const addCredit = async (req, res) => {
       return res.status(400).json({ msg: 'Invalid amount' });
     }
 
+    // אם נשלחה תמונה, מעלים אותה לענן ושומרים את הכתובת
+    let imageUrl = undefined;
+    if (req.file) {
+      imageUrl = await uploadToCloudinary(req.file.buffer);
+    }
+
     // יצירת הזיכוי ושמירה במסד הנתונים
     const credit = new Credit({
       userId: req.user.userId,   // לוקחים את מזהה המשתמש מהטוקן
       storeName: trimmedStore,
       amount: numAmount,
-      expiryDate: validDate || undefined
+      expiryDate: validDate || undefined,
+      image: imageUrl            // כתובת התמונה מהענן (אם הועלתה)
     });
     await credit.save();
 
@@ -43,10 +51,10 @@ const addCredit = async (req, res) => {
   }
 };
 
-// getCredits - שליפת כל הזיכויים של המשתמש המחובר
+// getCredits: שליפת כל הזיכויים של המשתמש המחובר
 const getCredits = async (req, res) => {
   try {
-    // מחפשים רק זיכויים שהuserId שלהם תואם למשתמש הנוכחי
+    // מחפשים רק זיכויים שה userId שלהם תואם למשתמש הנוכחי
     const credits = await Credit.find({ userId: req.user.userId });
     res.status(200).json(credits);
   } catch (err) {
@@ -54,17 +62,17 @@ const getCredits = async (req, res) => {
   }
 };
 
-// useCredit - סימון זיכוי כמומש
+// useCredit: סימון זיכוי כמומש
 const useCredit = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // בדיקה שה-id הוא ObjectId תקין של MongoDB
+    // בדיקה שה id הוא ObjectId תקין של MongoDB
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ msg: 'Invalid id' });
     }
 
-    // עדכון הזיכוי - רק אם הוא שייך למשתמש הנוכחי
+    // עדכון הזיכוי, רק אם הוא שייך למשתמש הנוכחי
     const credit = await Credit.findOneAndUpdate(
       { _id: id, userId: req.user.userId },
       { isUsed: true },
@@ -79,17 +87,17 @@ const useCredit = async (req, res) => {
   }
 };
 
-// deleteCredit - מחיקת זיכוי
+// deleteCredit: מחיקת זיכוי
 const deleteCredit = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // בדיקה שה-id תקין
+    // בדיקה שה id תקין
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ msg: 'Invalid id' });
     }
 
-    // מחיקת הזיכוי - רק אם הוא שייך למשתמש הנוכחי
+    // מחיקת הזיכוי, רק אם הוא שייך למשתמש הנוכחי
     const credit = await Credit.findOneAndDelete({ _id: id, userId: req.user.userId });
 
     if (!credit) return res.status(404).json({ msg: 'Credit not found' });

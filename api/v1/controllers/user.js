@@ -1,5 +1,5 @@
-// controllers/user.js - לוגיקת משתמשים
-// מכיל את הפונקציות register ו-login
+// controllers/user.js: לוגיקת משתמשים
+// מכיל את הפונקציות register ו login
 
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 // ביטוי רגולרי לבדיקת תקינות אימייל
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// register - הרשמת משתמש חדש
+// register: הרשמת משתמש חדש
 const register = async (req, res) => {
   try {
     // קבלת הנתונים מגוף הבקשה
@@ -30,7 +30,7 @@ const register = async (req, res) => {
       return res.status(400).json({ msg: 'Password must be at least 6 characters' });
     }
 
-    // הצפנת הסיסמה לפני השמירה (10 = רמת החוזק של ההצפנה)
+    // הצפנת הסיסמה לפני השמירה (10 הוא רמת החוזק של ההצפנה)
     const hashPass = await bcrypt.hash(trimmedPassword, 10);
 
     // יצירת משתמש חדש ושמירה במסד הנתונים
@@ -39,7 +39,7 @@ const register = async (req, res) => {
 
     res.status(201).json({ msg: 'User registered successfully', userId: user._id });
   } catch (err) {
-    // קוד 11000 מ-MongoDB = אימייל כבר קיים
+    // קוד 11000 מ MongoDB אומר שהאימייל כבר קיים
     if (err.code === 11000) {
       return res.status(400).json({ msg: 'Email already exists' });
     }
@@ -47,7 +47,7 @@ const register = async (req, res) => {
   }
 };
 
-// login - התחברות משתמש קיים
+// login: התחברות משתמש קיים
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -73,7 +73,7 @@ const login = async (req, res) => {
       return res.status(401).json({ msg: 'Invalid credentials' });
     }
 
-    // בדיקה שמפתח ה-JWT מוגדר
+    // בדיקה שמפתח ה JWT מוגדר
     if (!process.env.JWT_SECRET) {
       return res.status(500).json({ msg: 'Server error' });
     }

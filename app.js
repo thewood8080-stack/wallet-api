@@ -1,4 +1,6 @@
-// טעינת משתני סביבה וייבוא חבילות
+// app.js: הגדרת האפליקציה הראשית
+// כאן מגדירים את כל ה-Middleware, הנתיבים והחיבור למסד הנתונים
+
 require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
 const express = require('express');
 const mongoose = require('mongoose');
@@ -8,7 +10,7 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
-// הגדרת Rate Limiting - הגבלת בקשות
+// הגדרת Rate Limiting: הגבלת בקשות
 // מגביל כל משתמש ל-100 בקשות בכל 15 דקות
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -25,12 +27,13 @@ const authLimiter = rateLimit({
 
 // הגדרת Middleware גלובלי
 app.use(cors({ origin: true, credentials: true })); // מאפשר בקשות Cross-Origin
-app.use(morgan('dev')); // לוג בקשות לפיתוח
-app.use(express.json({ limit: '10mb' })); // פענוח JSON עד 10MB
+app.use(morgan('dev'));                              // לוג בקשות לפיתוח
+app.use(express.json({ limit: '10mb' }));           // פענוח JSON עד 10MB
 app.use(express.urlencoded({ limit: '10mb', extended: true })); // פענוח טפסים
 app.use('/user', authLimiter); // הגנה מוגברת על נתיבי משתמש
-app.use(limiter); // הגבלה כללית על כל הנתיבים
+app.use(limiter);              // הגבלה כללית על כל הנתיבים
 
+// הגשת קבצי Frontend סטטיים
 app.use(express.static('./api/v1/views/wallet'));
 
 // ייבוא וחיבור נתיבים (Routes)
