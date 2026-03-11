@@ -396,8 +396,8 @@
     // showQR: יוצר QR קוד לזיכוי דרך API חיצוני ומציג במודל
     function showQR(store, amount, expiryDate, voucherNumber) {
         const expiry = expiryDate && expiryDate !== 'undefined' ? new Date(expiryDate).toLocaleDateString('he-IL') : 'ללא';
-        // אם יש מספר שובר - הוא הטקסט הראשי ב-QR, אחרת רק פרטי הזיכוי
-        const qrText = voucherNumber ? voucherNumber : (store + ' | ' + amount + ' | ' + expiry);
+        // בניית טקסט ה-QR: תמיד כולל שם חנות, סכום ותוקף. מספר שובר מתווסף אם קיים
+        const qrText = (voucherNumber ? voucherNumber + ' | ' : '') + store + ' | ' + amount + ' | ' + expiry;
         // שימוש ב-API חינמי שמייצר תמונת QR לפי טקסט
         const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrText);
         document.getElementById('qrModalTitle').innerText = store + ' — &#8362;' + amount;
