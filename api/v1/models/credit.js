@@ -10,6 +10,7 @@ const creditSchema = new mongoose.Schema({
   category:   { type: String, default: 'אחר' },         // קטגוריה, ברירת מחדל: אחר
   amount:     { type: Number, required: true, min: 0 }, // סכום הזיכוי, חייב להיות 0 ומעלה
   expiryDate: { type: Date },                           // תאריך תפוגה, לא חובה
+  voucherNumber: { type: String },                      // מספר השובר של החנות לשימוש בקופה, לא חובה
   isUsed:     { type: Boolean, default: false },        // האם הזיכוי מומש, ברירת מחדל: לא
   image:      { type: String }                          // כתובת תמונה מהענן, לא חובה
 }, { timestamps: true }); // מוסיף תאריך יצירה ועדכון אוטומטית

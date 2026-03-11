@@ -98,6 +98,10 @@
                     <label class="small text-white mb-1">תאריך תפוגה</label>
                     <input type="date" id="expiry" class="form-control-custom w-100">
                 </div>
+                <div class="col-md-2">
+                    <label class="small text-white mb-1">מספר שובר</label>
+                    <input type="text" id="voucherNumber" class="form-control-custom w-100" placeholder="למשל: 10050009151">
+                </div>
                 <div class="col-md-1 text-center">
                     <label class="small text-white mb-1 d-block">תמונה</label>
                     <!-- לפני צילום: כפתור מצלמה -->
@@ -318,7 +322,7 @@
                 ${item.image ? `<img src="${item.image}" class="w-100 rounded-3 mb-3" style="height:120px; object-fit:cover; cursor:pointer" onclick="openFullImage('${item.image}')">` : ''}
                 <div class="fs-2 fw-bold">&#8362;${item.amount}</div>
                 <div class="text-white-50 small mb-3">תוקף: ${item.expiryDate ? new Date(item.expiryDate).toLocaleDateString('he-IL') : 'ללא'}</div>
-                <button class="btn btn-outline-light btn-sm w-100 mb-2" onclick="showQR('${item.storeName}', ${item.amount}, '${item.expiryDate}')"><i class="bi bi-qr-code me-1"></i>הצג QR לקופה</button>
+                <button class="btn btn-outline-light btn-sm w-100 mb-2" onclick="showQR('${item.storeName}', ${item.amount}, '${item.expiryDate}', '${item.voucherNumber || ''}')"><i class="bi bi-qr-code me-1"></i>הצג QR לקופה</button>
                 <div class="d-flex gap-2">
                     <button class="btn btn-success btn-sm w-100" onclick="useItem('${item._id}')">מימוש</button>
                     <button class="btn btn-outline-danger btn-sm w-100" onclick="deleteItem('${item._id}')">מחק</button>
@@ -341,6 +345,7 @@
         formData.append('category', cat);
         formData.append('amount', amt);
         formData.append('expiryDate', document.getElementById('expiry').value);
+        formData.append('voucherNumber', document.getElementById('voucherNumber').value);
         if(capturedImageBlob) formData.append('image', capturedImageBlob, 'receipt.jpg');
 
         try {
@@ -389,14 +394,15 @@
     }
 
     // showQR: יוצר QR קוד לזיכוי דרך API חיצוני ומציג במודל
-    function showQR(store, amount, expiryDate) {
+    function showQR(store, amount, expiryDate, voucherNumber) {
         const expiry = expiryDate && expiryDate !== 'undefined' ? new Date(expiryDate).toLocaleDateString('he-IL') : 'ללא';
-        const qrText = store + ' | ' + amount + ' | ' + expiry;
+        // אם יש מספר שובר - הוא הטקסט הראשי ב-QR, אחרת רק פרטי הזיכוי
+        const qrText = voucherNumber ? voucherNumber : (store + ' | ' + amount + ' | ' + expiry);
         // שימוש ב-API חינמי שמייצר תמונת QR לפי טקסט
         const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrText);
         document.getElementById('qrModalTitle').innerText = store + ' — &#8362;' + amount;
         document.getElementById('qrImage').src = qrUrl;
-        document.getElementById('qrDetails').innerText = 'תוקף: ' + expiry;
+        document.getElementById('qrDetails').innerText = (voucherNumber ? 'שובר: ' + voucherNumber + ' | ' : '') + 'תוקף: ' + expiry;
         new bootstrap.Modal(document.getElementById('qrModal')).show();
     }
 

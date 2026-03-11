@@ -9,7 +9,7 @@ const { uploadToCloudinary } = require('../middlewares/upload');
 const addCredit = async (req, res) => {
   try {
     // קבלת הנתונים מגוף הבקשה
-    const { storeName, category, amount, expiryDate } = req.body;
+    const { storeName, category, amount, expiryDate, voucherNumber } = req.body;
 
     // ניקוי שם החנות מרווחים מיותרים
     const trimmedStore = typeof storeName === 'string' ? storeName.trim() : '';
@@ -46,6 +46,7 @@ const addCredit = async (req, res) => {
       storeName: trimmedStore,
       category: category || 'אחר', // קטגוריה שנשלחה מהטופס
       amount: numAmount,
+      voucherNumber: voucherNumber || undefined, // מספר שובר החנות (אם הוזן)
       expiryDate: validDate || undefined,
       image: imageUrl            // כתובת התמונה מהענן (אם הועלתה)
     });
