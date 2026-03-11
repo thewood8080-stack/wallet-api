@@ -174,13 +174,21 @@
 
 <script>
     const API = window.location.origin || '';
-    let token = '';
+    let token = localStorage.getItem('token') || '';
     let capturedImageBlob = null;
 
     /* ניהול סקשנים */
     function showSection(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
+    }
+
+    /* טעינה אוטומטית אם יש טוקן שמור */
+    if (token) {
+        document.getElementById('authButtons').classList.add('d-none');
+        document.getElementById('userMenu').classList.remove('d-none');
+        showSection('dashboardSection');
+        loadData();
     }
 
     function escapeHtml(str) {
@@ -193,6 +201,7 @@
     function handleAuthError(res) {
         if (res.status === 401) {
             token = '';
+            localStorage.removeItem('token');
             document.getElementById('authButtons').classList.remove('d-none');
             document.getElementById('userMenu').classList.add('d-none');
             showSection('loginSection');
@@ -244,6 +253,7 @@
             const data = await res.json().catch(() => ({}));
             if (res.ok) {
                 token = data.token;
+                localStorage.setItem('token', token);
                 document.getElementById('authButtons').classList.add('d-none');
                 document.getElementById('userMenu').classList.remove('d-none');
                 showSection('dashboardSection');
@@ -258,6 +268,7 @@
 
     function logout() {
         token = '';
+        localStorage.removeItem('token');
         location.reload();
     }
 

@@ -47,6 +47,7 @@ const addCredit = async (req, res) => {
 
     res.status(201).json({ msg: 'Credit added successfully', credit });
   } catch (err) {
+    console.error('addCredit error:', err.message);
     res.status(500).json({ msg: 'Failed to add credit' });
   }
 };
