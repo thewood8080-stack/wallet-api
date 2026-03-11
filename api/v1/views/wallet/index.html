@@ -146,11 +146,25 @@
         document.getElementById(id).classList.add('active');
     }
 
-    if(token) { 
+    if(token) {
         document.getElementById('logoutBtn').classList.remove('d-none');
         showSection('dashboardSection');
         loadData();
+        // שמירת מצב התחלתי בהיסטוריה של הדפדפן
+        history.replaceState({ section: 'dashboard' }, '');
     }
+
+    // כפתור חזור של הדפדפן/נייד
+    window.addEventListener('popstate', function(e) {
+        const state = e.state;
+        if (!state || state.section === 'dashboard') {
+            showSection('dashboardSection');
+        } else if (state.section === 'storeView') {
+            openCategory(state.cat, false);
+        } else if (state.section === 'creditsView') {
+            openStore(state.store, state.cat, false);
+        }
+    });
 
     async function loadData() {
         try {
@@ -208,7 +222,7 @@
         }).join('');
     }
 
-    function openCategory(cat) {
+    function openCategory(cat, addHistory = true) {
         const catItems = allItems.filter(i => i.category === cat);
         const stores = [...new Set(catItems.map(i => i.storeName))];
         document.getElementById('currentCategoryTitle').innerText = cat;
@@ -220,12 +234,13 @@
                 <span class="fs-5 fw-bold">${store}</span> - ${storeItems.length} זיכויים (₪${sum})</div>`;
         }).join('');
         showSection('storeViewSection');
+        if (addHistory) history.pushState({ section: 'storeView', cat }, '');
     }
 
-    function openStore(store, cat) {
+    function openStore(store, cat, addHistory = true) {
         const storeItems = allItems.filter(i => i.storeName === store && i.category === cat);
         document.getElementById('currentStoreTitle').innerText = store;
-        document.getElementById('backToStoresBtn').onclick = () => openCategory(cat);
+        document.getElementById('backToStoresBtn').onclick = () => openCategory(cat, true);
         const grid = document.getElementById('creditsGrid');
         grid.innerHTML = storeItems.map(item => {
             const diff = item.expiryDate ? Math.ceil((new Date(item.expiryDate) - new Date()) / (86400000)) : null;
@@ -246,6 +261,7 @@
             </div></div>`;
         }).join('');
         showSection('creditsViewSection');
+        if (addHistory) history.pushState({ section: 'creditsView', store, cat }, '');
     }
 
     async function addItem() {
