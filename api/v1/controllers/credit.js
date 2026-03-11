@@ -9,7 +9,7 @@ const { uploadToCloudinary } = require('../middlewares/upload');
 const addCredit = async (req, res) => {
   try {
     // קבלת הנתונים מגוף הבקשה
-    const { storeName, amount, expiryDate } = req.body;
+    const { storeName, category, amount, expiryDate } = req.body;
 
     // ניקוי שם החנות מרווחים מיותרים
     const trimmedStore = typeof storeName === 'string' ? storeName.trim() : '';
@@ -29,16 +29,22 @@ const addCredit = async (req, res) => {
       return res.status(400).json({ msg: 'Invalid amount' });
     }
 
-    // אם נשלחה תמונה, מעלים אותה לענן ושומרים את הכתובת
+    // אם נשלחה תמונה, מנסים להעלות לענן
+    // אם העלאה נכשלת, ממשיכים לשמור את הזיכוי בלי תמונה
     let imageUrl = undefined;
     if (req.file) {
-      imageUrl = await uploadToCloudinary(req.file.buffer);
+      try {
+        imageUrl = await uploadToCloudinary(req.file.buffer);
+      } catch (uploadErr) {
+        console.error('Image upload failed:', uploadErr.message);
+      }
     }
 
     // יצירת הזיכוי ושמירה במסד הנתונים
     const credit = new Credit({
       userId: req.user.userId,   // לוקחים את מזהה המשתמש מהטוקן
       storeName: trimmedStore,
+      category: category || 'אחר', // קטגוריה שנשלחה מהטופס
       amount: numAmount,
       expiryDate: validDate || undefined,
       image: imageUrl            // כתובת התמונה מהענן (אם הועלתה)
