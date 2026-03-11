@@ -4,11 +4,19 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Wallet Pro | ניהול זיכויים</title>
+
+    <!-- ייבוא Bootstrap RTL לעיצוב רספונסיבי עם תמיכה בעברית מימין לשמאל -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <!-- ייבוא Bootstrap Icons לאייקונים כמו מצלמה ו-QR -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <!-- ייבוא פונט Assistant מגוגל -->
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
+
     <style>
+        /* משתני CSS גלובליים לצבעים ועיצוב */
         :root { --bg: #050811; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
+
+        /* עיצוב הגוף: תמונת רקע עם שכבת כיהוי, פונט ומינימום גובה */
         body {
             background: linear-gradient(rgba(5, 8, 17, 0.85), rgba(5, 8, 17, 0.85)),
                         url('https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?q=80&w=2000') no-repeat center center fixed;
@@ -17,11 +25,19 @@
             font-family: 'Assistant', sans-serif;
             min-height: 100vh;
         }
+
+        /* עיצוב שדות קלט מותאמים: רקע שקוף, גבול עדין, טקסט לבן */
         .form-control-custom { background: rgba(255,255,255,0.08); border: 1px solid var(--border); border-radius: 12px; color: #fff; padding: 10px; }
         .form-control-custom::placeholder { color: rgba(255,255,255,0.4); }
+
+        /* עיצוב כרטיסי קטגוריה: זכוכית עם אנימציית hover */
         .category-card { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem; cursor: pointer; transition: 0.3s; }
         .category-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.1); }
+
+        /* ניהול תצוגת סקשנים: רק הסקשן הפעיל מוצג */
         .section { display: none; } .section.active { display: block; }
+
+        /* עיצוב תגי התראת תוקף: urgent=אדום, soon=כתום */
         .expiry-alert { font-size: 0.8rem; padding: 4px 10px; border-radius: 20px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
         .urgent { background: #ef4444; color: white; }
         .soon { background: #f59e0b; color: #000; }
@@ -29,6 +45,7 @@
 </head>
 <body>
 
+<!-- סרגל ניווט עליון: לוגו + כפתור התנתקות -->
 <nav class="p-3 border-bottom border-secondary mb-4">
     <div class="container d-flex justify-content-between">
         <span class="fs-3 fw-bold">WALLET<span class="text-primary">PRO</span></span>
@@ -37,6 +54,8 @@
 </nav>
 
 <div class="container">
+
+    <!-- סקשן כניסה: מוצג למשתמש שלא מחובר -->
     <div id="loginSection" class="section active text-center">
         <div class="p-5 rounded-5 d-inline-block" style="background: var(--glass); min-width: 320px;">
             <h2 class="mb-4">כניסה למערכת</h2>
@@ -46,11 +65,14 @@
         </div>
     </div>
 
+    <!-- סקשן דשבורד: טופס הוספת זיכוי + רשת קטגוריות -->
     <div id="dashboardSection" class="section">
         <div class="mb-3">
             <h4 class="fw-bold mb-1">הוספת זיכוי חדש</h4>
             <p class="text-white-50 small mb-0">מלא את הפרטים ולחץ "שמור זיכוי" כדי להוסיף זיכוי לרשימה</p>
         </div>
+
+        <!-- טופס הוספת זיכוי -->
         <div class="p-4 rounded-4 mb-5" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border);">
             <div class="row g-3 align-items-end">
                 <div class="col-md-3">
@@ -69,7 +91,7 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="small text-white mb-1">סכום (₪)</label>
+                    <label class="small text-white mb-1">סכום (&#8362;)</label>
                     <input type="number" id="amount" class="form-control-custom w-100" placeholder="0">
                 </div>
                 <div class="col-md-2">
@@ -82,7 +104,7 @@
                     <div id="cameraBtn">
                         <button class="btn btn-light rounded-circle p-2" onclick="openCamera()" title="צלם קבלה"><i class="bi bi-camera"></i></button>
                     </div>
-                    <!-- אחרי צילום: תצוגה מקדימה + כפתורי פעולה -->
+                    <!-- אחרי צילום: תצוגה מקדימה + כפתור לצילום חוזר -->
                     <div id="photoPreviewArea" class="d-none">
                         <img id="photoPreview" src="" style="width:50px; height:50px; object-fit:cover; border-radius:8px;">
                         <div class="mt-1">
@@ -95,24 +117,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- רשת הקטגוריות, מתמלאת דינמית מה-JS -->
         <h3 class="mb-4 fw-bold">הקטגוריות שלך</h3>
         <div id="categoriesGrid" class="row g-4"></div>
     </div>
 
+    <!-- סקשן תצוגת חנויות בקטגוריה שנבחרה -->
     <div id="storeViewSection" class="section">
-        <button class="btn btn-link text-white mb-3" onclick="showSection('dashboardSection')">← חזור לקטגוריות</button>
+        <button class="btn btn-link text-white mb-3" onclick="showSection('dashboardSection')">&#8592; חזור לקטגוריות</button>
         <h2 id="currentCategoryTitle" class="mb-4 text-primary"></h2>
         <div id="storesList"></div>
     </div>
 
+    <!-- סקשן תצוגת זיכויים בחנות שנבחרה -->
     <div id="creditsViewSection" class="section">
-        <button class="btn btn-link text-white mb-3" id="backToStoresBtn">← חזור לחנויות</button>
+        <button class="btn btn-link text-white mb-3" id="backToStoresBtn">&#8592; חזור לחנויות</button>
         <h2 id="currentStoreTitle" class="mb-4"></h2>
         <div id="creditsGrid" class="row g-4"></div>
     </div>
+
 </div>
 
-<!-- מודל התראת זיכויים שפגים בקרוב -->
+<!-- מודל התראת זיכויים שפגים בתוך חודשיים -->
 <div class="modal fade" id="expiryAlertModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-white rounded-4 p-4" style="background: #1a1a2e; border: 1px solid rgba(255,255,255,0.15);">
@@ -130,9 +157,13 @@
     </div>
 </div>
 
+<!-- מודל מצלמה לצילום קבלה -->
 <div class="modal fade" id="camModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content bg-dark p-4"><video id="video" width="100%" autoplay class="rounded-3 mb-3"></video><button class="btn btn-primary w-100" onclick="takePhoto()">צלם</button></div></div></div>
+
+<!-- מודל הגדלת תמונה בלחיצה -->
 <div class="modal fade" id="imgModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content bg-transparent text-center"><img id="fullImg" src="" class="img-fluid rounded-4 shadow-lg"><button class="btn btn-light mt-3" data-bs-dismiss="modal">סגור</button></div></div></div>
 
+<!-- מודל QR קוד: מציג קוד סריקה לזיכוי בקופת החנות -->
 <div class="modal fade" id="qrModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-white rounded-4 p-4" style="background: #1a1a2e; border: 1px solid rgba(255,255,255,0.15);">
@@ -140,6 +171,7 @@
                 <h5 class="modal-title fw-bold" id="qrModalTitle"></h5>
             </div>
             <div class="modal-body text-center pt-0">
+                <!-- רקע לבן נדרש כדי שה-QR יהיה סריק -->
                 <div class="bg-white p-3 rounded-3 d-inline-block mb-3">
                     <img id="qrImage" src="" style="width:200px; height:200px;">
                 </div>
@@ -152,27 +184,34 @@
     </div>
 </div>
 
+<!-- ייבוא Bootstrap JS לתפקוד מודלים וקומפוננטים -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // כתובת בסיס ה-API: origin של הדף הנוכחי
     const API = window.location.origin || '';
+    // טוקן JWT שמור ב-localStorage
     let token = localStorage.getItem('token') || '';
+    // מערך כל הזיכויים הפעילים של המשתמש
     let allItems = [];
+    // תמונה שצולמה, נשמרת כ-Blob לפני שליחה לשרת
     let capturedImageBlob = null;
 
+    // showSection: מציג סקשן אחד ומסתיר את כל השאר
     function showSection(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
+    // בדיקת התחברות: אם יש טוקן, מציגים את הדשבורד
     if(token) {
         document.getElementById('logoutBtn').classList.remove('d-none');
         showSection('dashboardSection');
         loadData();
-        // שמירת מצב התחלתי בהיסטוריה של הדפדפן
+        // שמירת המצב הראשוני בהיסטוריה לתמיכה בכפתור חזור
         history.replaceState({ section: 'dashboard' }, '');
     }
 
-    // כפתור חזור של הדפדפן/נייד
+    // טיפול בכפתור חזור של הדפדפן/נייד
     window.addEventListener('popstate', function(e) {
         const state = e.state;
         if (!state || state.section === 'dashboard') {
@@ -184,22 +223,24 @@
         }
     });
 
+    // loadData: שליפת כל הזיכויים הפעילים מהשרת
     async function loadData() {
         try {
             const res = await fetch(`${API}/credit/`, { headers: { 'Authorization': `Bearer ${token}` } });
             const data = await res.json();
+            // מסנן רק זיכויים שלא מומשו
             allItems = data.filter(i => !i.isUsed);
             renderCategories();
             checkExpiryAlerts();
-        } catch (e) { console.error("טעינה נכשלה", e); }
+        } catch (e) { console.error("load failed", e); }
     }
 
+    // checkExpiryAlerts: מציג התראה אם יש זיכויים שיפוגו בתוך חודשיים
     function checkExpiryAlerts() {
         const now = new Date();
         const twoMonthsFromNow = new Date();
         twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
 
-        // מסנן זיכויים שתוקפם יפוג בתוך חודשיים מהיום
         const expiringSoon = allItems.filter(i => {
             if (!i.expiryDate) return false;
             const exp = new Date(i.expiryDate);
@@ -208,11 +249,12 @@
 
         if (expiringSoon.length === 0) return;
 
-        // בניית הרשימה בתוך המודל
+        // בניית רשימת הזיכויים הפגים בתוך המודל
         const list = document.getElementById('expiryAlertList');
         list.innerHTML = expiringSoon.map(i => {
             const exp = new Date(i.expiryDate);
             const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
+            // צבע לפי דחיפות: אדום עד 7 ימים, כתום עד 30, סגול עד 60
             const color = diffDays <= 7 ? '#ef4444' : diffDays <= 30 ? '#f59e0b' : '#6366f1';
             return `
                 <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded-3" style="background: rgba(255,255,255,0.05);">
@@ -221,7 +263,7 @@
                         <span class="text-white-50 small me-2">(${i.category || 'אחר'})</span>
                     </div>
                     <div class="text-end">
-                        <div class="fw-bold">₪${i.amount}</div>
+                        <div class="fw-bold">&#8362;${i.amount}</div>
                         <div class="small" style="color: ${color}">עוד ${diffDays} ימים</div>
                     </div>
                 </div>`;
@@ -230,16 +272,18 @@
         new bootstrap.Modal(document.getElementById('expiryAlertModal')).show();
     }
 
+    // renderCategories: מציג את כרטיסי הקטגוריות עם סיכום לכל קטגוריה
     function renderCategories() {
         const categories = [...new Set(allItems.map(i => i.category || 'אחר'))];
         const grid = document.getElementById('categoriesGrid');
         grid.innerHTML = categories.map(cat => {
             const items = allItems.filter(i => i.category === cat);
             const sum = items.reduce((a, b) => a + Number(b.amount), 0);
-            return `<div class="col-md-4"><div class="category-card" onclick="openCategory('${cat}')"><h4 class="fw-bold">${cat}</h4><div class="text-white-50">${items.length} זיכויים | ₪${sum}</div></div></div>`;
+            return `<div class="col-md-4"><div class="category-card" onclick="openCategory('${cat}')"><h4 class="fw-bold">${cat}</h4><div class="text-white-50">${items.length} זיכויים | &#8362;${sum}</div></div></div>`;
         }).join('');
     }
 
+    // openCategory: מציג את החנויות בתוך קטגוריה שנבחרה
     function openCategory(cat, addHistory = true) {
         const catItems = allItems.filter(i => i.category === cat);
         const stores = [...new Set(catItems.map(i => i.storeName))];
@@ -249,18 +293,20 @@
             const storeItems = catItems.filter(i => i.storeName === store);
             const sum = storeItems.reduce((a, b) => a + Number(b.amount), 0);
             return `<div class="p-3 mb-2 rounded-3 border border-secondary" style="cursor:pointer" onclick="openStore('${store}', '${cat}')">
-                <span class="fs-5 fw-bold">${store}</span> - ${storeItems.length} זיכויים (₪${sum})</div>`;
+                <span class="fs-5 fw-bold">${store}</span> - ${storeItems.length} זיכויים (&#8362;${sum})</div>`;
         }).join('');
         showSection('storeViewSection');
         if (addHistory) history.pushState({ section: 'storeView', cat }, '');
     }
 
+    // openStore: מציג את כרטיסי הזיכויים של חנות מסוימת
     function openStore(store, cat, addHistory = true) {
         const storeItems = allItems.filter(i => i.storeName === store && i.category === cat);
         document.getElementById('currentStoreTitle').innerText = store;
         document.getElementById('backToStoresBtn').onclick = () => openCategory(cat, true);
         const grid = document.getElementById('creditsGrid');
         grid.innerHTML = storeItems.map(item => {
+            // חישוב ימים עד לתפוגה
             const diff = item.expiryDate ? Math.ceil((new Date(item.expiryDate) - new Date()) / (86400000)) : null;
             let alert = '';
             if(diff !== null) {
@@ -270,7 +316,7 @@
             return `<div class="col-md-4"><div class="p-4 rounded-4" style="background:rgba(255,255,255,0.05); border:1px solid var(--border)">
                 ${alert}
                 ${item.image ? `<img src="${item.image}" class="w-100 rounded-3 mb-3" style="height:120px; object-fit:cover; cursor:pointer" onclick="openFullImage('${item.image}')">` : ''}
-                <div class="fs-2 fw-bold">₪${item.amount}</div>
+                <div class="fs-2 fw-bold">&#8362;${item.amount}</div>
                 <div class="text-white-50 small mb-3">תוקף: ${item.expiryDate ? new Date(item.expiryDate).toLocaleDateString('he-IL') : 'ללא'}</div>
                 <button class="btn btn-outline-light btn-sm w-100 mb-2" onclick="showQR('${item.storeName}', ${item.amount}, '${item.expiryDate}')"><i class="bi bi-qr-code me-1"></i>הצג QR לקופה</button>
                 <div class="d-flex gap-2">
@@ -283,6 +329,7 @@
         if (addHistory) history.pushState({ section: 'creditsView', store, cat }, '');
     }
 
+    // addItem: שולח את הזיכוי החדש לשרת עם FormData (כולל תמונה אם צולמה)
     async function addItem() {
         const name = document.getElementById('storeName').value;
         const cat = document.getElementById('category').value;
@@ -303,15 +350,20 @@
         } catch (e) { alert("שגיאת רשת"); }
     }
 
+    // useItem: מסמן זיכוי כמומש ומסיר אותו מהרשימה
     async function useItem(id) { if(confirm("לממש ולהסיר?")) { await fetch(`${API}/credit/${id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); loadData(); showSection('dashboardSection'); } }
+
+    // deleteItem: מוחק זיכוי לצמיתות
     async function deleteItem(id) { if(confirm("למחוק?")) { await fetch(`${API}/credit/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); loadData(); showSection('dashboardSection'); } }
-    
+
+    // openCamera: פותח את המצלמה האחורית של המכשיר בתוך מודל
     function openCamera() {
         new bootstrap.Modal(document.getElementById('camModal')).show();
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
             .then(s => document.getElementById('video').srcObject = s);
     }
 
+    // takePhoto: מצלם תמונה מה-video, שומר כ-Blob ומציג תצוגה מקדימה
     function takePhoto() {
         const v = document.getElementById('video');
         const c = document.createElement('canvas');
@@ -320,7 +372,6 @@
         c.getContext('2d').drawImage(v, 0, 0);
         c.toBlob(b => {
             capturedImageBlob = b;
-            // הצגת תצוגה מקדימה של התמונה שצולמה
             document.getElementById('photoPreview').src = URL.createObjectURL(b);
             document.getElementById('cameraBtn').classList.add('d-none');
             document.getElementById('photoPreviewArea').classList.remove('d-none');
@@ -329,27 +380,39 @@
         }, 'image/jpeg');
     }
 
+    // clearPhoto: מבטל את התמונה שצולמה וחוזר לכפתור המצלמה
     function clearPhoto() {
         capturedImageBlob = null;
         document.getElementById('photoPreview').src = '';
         document.getElementById('photoPreviewArea').classList.add('d-none');
         document.getElementById('cameraBtn').classList.remove('d-none');
     }
+
+    // showQR: יוצר QR קוד לזיכוי דרך API חיצוני ומציג במודל
     function showQR(store, amount, expiryDate) {
         const expiry = expiryDate && expiryDate !== 'undefined' ? new Date(expiryDate).toLocaleDateString('he-IL') : 'ללא';
         const qrText = store + ' | ' + amount + ' | ' + expiry;
+        // שימוש ב-API חינמי שמייצר תמונת QR לפי טקסט
         const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrText);
-        document.getElementById('qrModalTitle').innerText = store + ' — ₪' + amount;
+        document.getElementById('qrModalTitle').innerText = store + ' — &#8362;' + amount;
         document.getElementById('qrImage').src = qrUrl;
         document.getElementById('qrDetails').innerText = 'תוקף: ' + expiry;
         new bootstrap.Modal(document.getElementById('qrModal')).show();
     }
+
+    // openFullImage: מציג תמונה במסך מלא בתוך מודל
     function openFullImage(s) { document.getElementById('fullImg').src = s; new bootstrap.Modal(document.getElementById('imgModal')).show(); }
-    async function login() { 
-        const email = document.getElementById('loginEmail').value; const pass = document.getElementById('loginPassword').value;
+
+    // login: שולח בקשת התחברות ושומר את הטוקן ב-localStorage
+    async function login() {
+        const email = document.getElementById('loginEmail').value;
+        const pass = document.getElementById('loginPassword').value;
         const res = await fetch(`${API}/user/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: pass }) });
-        const data = await res.json(); if(res.ok) { localStorage.setItem('token', data.token); location.reload(); } else alert("שגיאה");
+        const data = await res.json();
+        if(res.ok) { localStorage.setItem('token', data.token); location.reload(); } else alert("שגיאה");
     }
+
+    // logout: מנקה את הטוקן מה-localStorage וטוען את הדף מחדש
     function logout() { localStorage.clear(); location.reload(); }
 </script>
 </body>
