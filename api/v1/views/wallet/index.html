@@ -78,8 +78,18 @@
                 </div>
                 <div class="col-md-1 text-center">
                     <label class="small text-white mb-1 d-block">תמונה</label>
-                    <button class="btn btn-light rounded-circle p-2" onclick="openCamera()" title="צלם קבלה"><i class="bi bi-camera"></i></button>
-                    <div id="camStatus" class="small text-success d-none mt-1">צולם!</div>
+                    <!-- לפני צילום: כפתור מצלמה -->
+                    <div id="cameraBtn">
+                        <button class="btn btn-light rounded-circle p-2" onclick="openCamera()" title="צלם קבלה"><i class="bi bi-camera"></i></button>
+                    </div>
+                    <!-- אחרי צילום: תצוגה מקדימה + כפתורי פעולה -->
+                    <div id="photoPreviewArea" class="d-none">
+                        <img id="photoPreview" src="" style="width:50px; height:50px; object-fit:cover; border-radius:8px;">
+                        <div class="mt-1 d-flex flex-column gap-1">
+                            <button class="btn btn-outline-light btn-sm" onclick="openCamera()">צלם שוב</button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="clearPhoto()">הסר</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-2">
                     <button class="btn btn-primary w-100 py-2" onclick="addItem()">שמור זיכוי</button>
@@ -100,6 +110,24 @@
         <button class="btn btn-link text-white mb-3" id="backToStoresBtn">← חזור לחנויות</button>
         <h2 id="currentStoreTitle" class="mb-4"></h2>
         <div id="creditsGrid" class="row g-4"></div>
+    </div>
+</div>
+
+<!-- מודל התראת זיכויים שפגים בקרוב -->
+<div class="modal fade" id="expiryAlertModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-white rounded-4 p-4" style="background: #1a1a2e; border: 1px solid rgba(255,255,255,0.15);">
+            <div class="modal-header border-0 pb-2">
+                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>התראה: זיכויים שפגים בקרוב</h5>
+            </div>
+            <div class="modal-body pt-0">
+                <p class="text-white-50 small mb-3">הזיכויים הבאים יפוגו בתוך חודשיים:</p>
+                <div id="expiryAlertList"></div>
+            </div>
+            <div class="modal-footer border-0 pt-2">
+                <button class="btn btn-warning w-100 rounded-pill" data-bs-dismiss="modal">הבנתי, אטפל בזה</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -130,7 +158,44 @@
             const data = await res.json();
             allItems = data.filter(i => !i.isUsed);
             renderCategories();
+            checkExpiryAlerts();
         } catch (e) { console.error("טעינה נכשלה", e); }
+    }
+
+    function checkExpiryAlerts() {
+        const now = new Date();
+        const twoMonthsFromNow = new Date();
+        twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+
+        // מסנן זיכויים שתוקפם יפוג בתוך חודשיים מהיום
+        const expiringSoon = allItems.filter(i => {
+            if (!i.expiryDate) return false;
+            const exp = new Date(i.expiryDate);
+            return exp >= now && exp <= twoMonthsFromNow;
+        });
+
+        if (expiringSoon.length === 0) return;
+
+        // בניית הרשימה בתוך המודל
+        const list = document.getElementById('expiryAlertList');
+        list.innerHTML = expiringSoon.map(i => {
+            const exp = new Date(i.expiryDate);
+            const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
+            const color = diffDays <= 7 ? '#ef4444' : diffDays <= 30 ? '#f59e0b' : '#6366f1';
+            return `
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded-3" style="background: rgba(255,255,255,0.05);">
+                    <div>
+                        <span class="fw-bold">${i.storeName}</span>
+                        <span class="text-white-50 small me-2">(${i.category || 'אחר'})</span>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold">₪${i.amount}</div>
+                        <div class="small" style="color: ${color}">עוד ${diffDays} ימים</div>
+                    </div>
+                </div>`;
+        }).join('');
+
+        new bootstrap.Modal(document.getElementById('expiryAlertModal')).show();
     }
 
     function renderCategories() {
@@ -206,11 +271,35 @@
     async function useItem(id) { if(confirm("לממש ולהסיר?")) { await fetch(`${API}/credit/${id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } }); loadData(); showSection('dashboardSection'); } }
     async function deleteItem(id) { if(confirm("למחוק?")) { await fetch(`${API}/credit/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); loadData(); showSection('dashboardSection'); } }
     
-    function openCamera() { new bootstrap.Modal(document.getElementById('camModal')).show(); navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(s => document.getElementById('video').srcObject = s); }
-    function takePhoto() { 
-        const v = document.getElementById('video'); const c = document.createElement('canvas');
-        c.width = v.videoWidth; c.height = v.videoHeight; c.getContext('2d').drawImage(v, 0, 0);
-        c.toBlob(b => { capturedImageBlob = b; document.getElementById('camStatus').classList.remove('d-none'); bootstrap.Modal.getInstance(document.getElementById('camModal')).hide(); v.srcObject.getTracks().forEach(t => t.stop()); }, 'image/jpeg');
+    function openCamera() {
+        new bootstrap.Modal(document.getElementById('camModal')).show();
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(s => document.getElementById('video').srcObject = s);
+    }
+
+    function takePhoto() {
+        const v = document.getElementById('video');
+        const c = document.createElement('canvas');
+        c.width = v.videoWidth;
+        c.height = v.videoHeight;
+        c.getContext('2d').drawImage(v, 0, 0);
+        c.toBlob(b => {
+            capturedImageBlob = b;
+            // הצגת תצוגה מקדימה של התמונה שצולמה
+            document.getElementById('photoPreview').src = URL.createObjectURL(b);
+            document.getElementById('cameraBtn').classList.add('d-none');
+            document.getElementById('photoPreviewArea').classList.remove('d-none');
+            bootstrap.Modal.getInstance(document.getElementById('camModal')).hide();
+            v.srcObject.getTracks().forEach(t => t.stop());
+        }, 'image/jpeg');
+    }
+
+    function clearPhoto() {
+        // ביטול התמונה וחזרה לכפתור המצלמה
+        capturedImageBlob = null;
+        document.getElementById('photoPreview').src = '';
+        document.getElementById('photoPreviewArea').classList.add('d-none');
+        document.getElementById('cameraBtn').classList.remove('d-none');
     }
     function openFullImage(s) { document.getElementById('fullImg').src = s; new bootstrap.Modal(document.getElementById('imgModal')).show(); }
     async function login() { 
