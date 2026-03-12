@@ -61,7 +61,22 @@
             <h2 class="mb-4">כניסה למערכת</h2>
             <input type="email" id="loginEmail" class="form-control-custom w-100 mb-3" placeholder="אימייל">
             <input type="password" id="loginPassword" class="form-control-custom w-100 mb-4" placeholder="סיסמה">
-            <button class="btn btn-primary w-100" onclick="login()">התחבר</button>
+            <button class="btn btn-primary w-100 mb-3" onclick="login()">התחבר</button>
+            <!-- קישור למסך הרשמה -->
+            <div class="text-white-50 small">אין לך חשבון? <a href="#" onclick="showSection('registerSection')" class="text-primary">הירשם</a></div>
+        </div>
+    </div>
+
+    <!-- סקשן הרשמה: יצירת חשבון חדש -->
+    <div id="registerSection" class="section text-center">
+        <div class="p-5 rounded-5 d-inline-block" style="background: var(--glass); min-width: 320px;">
+            <h2 class="mb-4">הרשמה</h2>
+            <input type="text" id="regName" class="form-control-custom w-100 mb-3" placeholder="שם מלא">
+            <input type="email" id="regEmail" class="form-control-custom w-100 mb-3" placeholder="אימייל">
+            <input type="password" id="regPassword" class="form-control-custom w-100 mb-4" placeholder="סיסמה (לפחות 6 תווים)">
+            <button class="btn btn-primary w-100 mb-3" onclick="register()">הירשם</button>
+            <!-- קישור חזרה למסך התחברות -->
+            <div class="text-white-50 small">יש לך חשבון? <a href="#" onclick="showSection('loginSection')" class="text-primary">התחבר</a></div>
         </div>
     </div>
 
@@ -408,6 +423,17 @@
 
     // openFullImage: מציג תמונה במסך מלא בתוך מודל
     function openFullImage(s) { document.getElementById('fullImg').src = s; new bootstrap.Modal(document.getElementById('imgModal')).show(); }
+
+    // register: שולח בקשת הרשמה ועובר למסך כניסה אם הצליח
+    async function register() {
+        const name = document.getElementById('regName').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const res = await fetch(`${API}/user/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password }) });
+        const data = await res.json();
+        if (res.ok) { alert("ההרשמה הצליחה! כעת התחבר."); showSection('loginSection'); }
+        else { alert(data.msg || "שגיאה בהרשמה"); }
+    }
 
     // login: שולח בקשת התחברות ושומר את הטוקן ב-localStorage
     async function login() {
